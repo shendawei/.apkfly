@@ -147,10 +147,12 @@ def getModuleMavenInfo(includeModules):
                         # 这里不能直接用line包含includeModule，应为module有MIm、MImlibrary这样的，如果只include MIm，MImlibrary也会被修改，所以得加上: 一块匹配
                         if (includeModule + ":") in line_:
                             isMatch = True
+                            # printRed('1 > '+line_)
                             curModule = includeModule
                             break
-                        elif (":" + includeModule) in line_:
+                        elif ("':%s'" % includeModule) in line_:
                             isMatch = True
+                            # printRed('2 > '+line_)
                             curModule = includeModule
                             # 分割，取deps别名
                             lines = line_.split(':', 1)
