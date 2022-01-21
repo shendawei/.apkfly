@@ -414,8 +414,17 @@ def cmd_dep(args):
     :return:
     """
     project = args.project
+    configuration = args.configuration
+
+    if not configuration:
+        # 默认查询配置
+        configuration = "archives"
+
+    deps_cmd = "gradle -q %s:dependencies --configuration %s"
+
     if os.path.exists(os.path.join(dir_current, project)) and os.path.isdir(project):
-        deps_cmd = "gradle -q %s:dependencies --configuration compile" % project
+        deps_cmd = deps_cmd % (project, configuration)
+        printGreen(deps_cmd)
         deps_result = os.popen(deps_cmd)
         content_list = deps_result.readlines()
         dep_list = []
@@ -1395,6 +1404,7 @@ if __name__ == '__main__':
     parser_deps = subparsers.add_parser("deps", help=u"项目依赖关系分析")
     parser_deps.set_defaults(func=cmd_dep)
     parser_deps.add_argument("project", type=str, help=u'待分析依赖关系的项目名称')
+    parser_deps.add_argument("-c", "--configuration", type=str, help=u'依赖配置参数compile、api、implementation等')
 
     # 更新代码
     parser_pull = subparsers.add_parser("pull", help=u"更新 项目代码")
