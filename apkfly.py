@@ -418,7 +418,7 @@ def cmd_dep(args):
 
     if not configuration:
         # 默认查询配置
-        configuration = "archives"
+        configuration = "releaseCompileClasspath"
 
     deps_cmd = "gradle -q %s:dependencies --configuration %s"
 
