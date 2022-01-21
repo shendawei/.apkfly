@@ -415,12 +415,18 @@ def cmd_dep(args):
     """
     project = args.project
     configuration = args.configuration
+    dependency = args.dependency
 
     if not configuration:
         # 默认查询配置
         configuration = "releaseCompileClasspath"
 
-    deps_cmd = "gradle -q %s:dependencies --configuration %s"
+    if dependency:
+        # 查看特定依赖
+        deps_cmd = "gradle -q %s:dependencyInsight --configuration %s --dependency " + dependency
+    else:
+        # 查看依赖列表
+        deps_cmd = "gradle -q %s:dependencies --configuration %s"
 
     if os.path.exists(os.path.join(dir_current, project)) and os.path.isdir(project):
         deps_cmd = deps_cmd % (project, configuration)
@@ -1405,6 +1411,7 @@ if __name__ == '__main__':
     parser_deps.set_defaults(func=cmd_dep)
     parser_deps.add_argument("project", type=str, help=u'待分析依赖关系的项目名称')
     parser_deps.add_argument("-c", "--configuration", type=str, help=u'依赖配置参数compile、api、implementation等')
+    parser_deps.add_argument("-d", "--dependency", type=str, help=u'查看特定的依赖，maven信息，比如：widget')
 
     # 更新代码
     parser_pull = subparsers.add_parser("pull", help=u"更新 项目代码")
