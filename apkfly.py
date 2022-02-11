@@ -1386,7 +1386,7 @@ if __name__ == '__main__':
     # 版本自增
     parser_version = subparsers.add_parser("version", help=u"自增gradle.properties内的 aar 配置版本")
     parser_version.set_defaults(func=cmd_version_add)
-    parser_version.add_argument('-s', "--start", type=str, default='AAR_GFRAME_HTTP_VERSION',
+    parser_version.add_argument('-s', "--start", type=str, default='AAR_MODULE_VERSION_START_TAG',
                                 help=u'起始AAR版本【例：AAR_MFRAME2_VERSION】')
     parser_version.add_argument('-e', "--end", type=str, default='AAR_MAPP_VERSION',
                                 help=u'终止AAR版本')
