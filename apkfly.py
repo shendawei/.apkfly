@@ -287,6 +287,10 @@ def is_bundle_project(sub_file, projects):
 
     return checkbundle
 
+flutter_setting_content = '''setBinding(new Binding([gradle: this]))
+evaluate(new File(settingsDir, '/%s/.android/include_flutter.groovy'))
+include \":app\"
+project(\":app\").projectDir = new File(settingsDir, '%s')'''
 
 def cmd_setting(args):
     """
@@ -300,6 +304,22 @@ def cmd_setting(args):
     sub_file_list = [x for x in os.listdir(dir_current) if
                      check_sub_project(x, False)]
     setting_content = ""
+
+    if args.flutter:
+        mainModule = deploy.getMainModule(sub_file_list)
+        if mainModule == None:
+            printRed(u'没有找到主工程')
+            return
+        flutterModule = ""
+        for sub_file in sub_file_list:
+            if os.path.exists(os.path.join(dir_current, sub_file, '.android/include_flutter.groovy')):
+                flutterModule = sub_file
+        if flutterModule == "":
+            printRed(u'没有找到flutter工程')
+            return
+        setting_content = flutter_setting_content % (flutterModule, mainModule)
+        sub_file_list.remove(mainModule)
+
     for sub_file in sub_file_list:
         if setting_content == "":
             setting_content = "include \":%s\"" % sub_file
@@ -1366,6 +1386,7 @@ if __name__ == '__main__':
     parser_setting = subparsers.add_parser("setting",
                                            help=u"把workspace内所有的module配置到settings.gradle")
     parser_setting.set_defaults(func=cmd_setting)
+    parser_setting.add_argument('-f', "--flutter", help=u'配置flutter', action='store_true', default=False)
 
     # 提交gradle.properties到git服务器
     parser_setting = subparsers.add_parser("pushprop", help=u"提交gradle.properties到git服务器")
