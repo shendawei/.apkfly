@@ -119,8 +119,20 @@ def exec_sub_project(cmd, args):
     start_flag = False
     sub_file_list = [x for x in os.listdir(dir_current) if
                      check_sub_project(x, True)]
-    # 按文件名排序
-    sub_file_list.sort()
+
+    if len(sub_file_list) == 0:
+        printRed('not found sub project')
+        return
+
+    # print "project sub_file_list >>> ",sub_file_list
+    if is_order_sub_project(sub_file_list[0]):
+        # 按文件名排序
+        sub_file_list.sort()
+    else:
+        # 按project.xml文件中project的顺序排序
+        sub_file_list = sorft_by_projectxml(sub_file_list)
+    # print "project sub_file_list sort >>> ",sub_file_list
+
     for sub_file in sub_file_list:
         if start_project:
             if sub_file.startswith(start_project):
@@ -140,6 +152,20 @@ def exec_sub_project(cmd, args):
             print ">>>Error project:%s" % sub_file
             break
     print ">>>>>>running stop<<<<<<"
+
+def is_order_sub_project(sub_project_name):
+    p = re.compile(r"^\d{3}-[A-Za-z0-9-]+$") # 数字前缀，说明已经排序
+    return p.match(sub_project_name)
+
+# 按project.xml文件中project的顺序排序
+def sorft_by_projectxml(sub_file_list):
+    projects = XmlProject.parser_manifest("projects.xml",allow_private=True)
+    patch_list = []
+    for project in projects:
+        if(project.app == False):
+            patch_list.append(project.path)
+    sub_file_list_sort = [item for item in patch_list if item in sub_file_list]
+    return sub_file_list_sort
 
 def exec_one_project(cmd, sub_file):
     print ">>>Running project:%s" % sub_file
