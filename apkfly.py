@@ -96,7 +96,7 @@ def check_sub_project(sub_project, is_formate):
     if os.path.isdir(sub_project):
         if os.path.exists(os.path.join(dir_current, sub_project, file_build_gradle)):
             if is_formate:
-                p = re.compile(r"^\d{3}-[A-Za-z0-9-]+$")
+                p = re.compile(r"[A-Za-z0-9-]+$")#剔除了数字前缀判读，只有国美在服务器打包时有数组前缀，其他app没有数组前缀
                 if p.match(sub_project):
                     check_result = True
             else:
