@@ -32,7 +32,11 @@ class GitlabAPI(object):
         # projects = self.gl.projects.list(all=True)
         return projects
 
-    def get_project_by_name(self, namespace, name):
+    def get_project_by_name(self, name_with_namespace):
+        project = self.gl.projects.get(name_with_namespace)
+        return project
+
+    def get_project(self, namespace, name):
         """获取项目对象
 
         Args:
@@ -56,19 +60,21 @@ class GitlabAPI(object):
         '''
         b = project.branches.create({'branch': branch_name, 'ref': ref})
         print("create suc ^^^")
-        self.prn_obj(b)
 
-    def del_project_branch(self, project, branch_ame):
+    def del_project_branch_by_branch_name(self, project, branch_ame):
         '''
         删除分支
         :param project: 项目对象
         :param branch_ame: 要删除的分支名称
         :return:
         '''
-        project.branches.delete(branch_ame)
-        print("del suc ^^^")
+        try:
+            project.branches.delete(branch_ame)
+            print("del suc ^^^")
+        except gitlab.exceptions.GitlabDeleteError as e:
+            print('del err ~~~')
 
-    def del_project_branch(self, branch):
+    def del_project_branch_by_branch(self, branch):
         '''删除分支
         :param branch: 要删除的分支对象
         :return:
@@ -76,17 +82,46 @@ class GitlabAPI(object):
         branch.delete()
         print("del suc ^^^")
 
+    def create_merge_request(self, project, source_branch, target_branch, assignee_id = None):
+        mr = project.mergerequests.create({'source_branch': source_branch,
+                                           'target_branch': target_branch,
+                                           'title': "Merge branch '%s' into '%s'" % (source_branch, target_branch),
+                                           'assignee_id':assignee_id,
+                                           })
+        print(mr)
+
+    def get_merge_requests(self, project):
+        return project.mergerequests.list()
+
 if __name__ == '__main__':
     git = GitlabAPI()
 
-    # username='maxinliang1'
-    
-    # user = git.get_user(username)
-    # print(username + '   ->   ' + str(user))
+    username='maxinliang1'
 
-    owned_project = git.get_owned_projects()
-    for p in owned_project:
-        print(p.name + ': ' + p.http_url_to_repo)
+    user = git.get_user(username)
+    print(username + '   ->   ' + str(user))
 
-    project = git.get_project_by_name('mobile-android-common', 'GHybrid')
-    print(project.name)
+    # owned_project = git.get_owned_projects()
+    # for p in owned_project:
+    #     print(p.name + ': ' + p.http_url_to_repo)
+
+    project_name_with_namespace = 'maxinliang1/My007Project'
+    # 获取project
+    project = git.get_project_by_name(project_name_with_namespace)
+    print(project.name + ': ' + project.http_url_to_repo)
+
+    # branch_name = '202202test'
+    # 创建分支
+    # branch = git.create_project_branch(project, branch_name, 'master')
+    # print(branch.name)
+
+    # 删除分支
+    # git.del_project_branch_by_branch_name(project, branch_name)
+
+    # merge request
+    # git.create_merge_request(project, 'dev-2', 'master')
+
+    # merge_request_list = git.get_merge_requests(project)
+    # for mr in merge_request_list:
+    #     print(mr)
+
