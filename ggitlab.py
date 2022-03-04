@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 # encoding: utf-8
-#
 
 __Author__ = 'maxinliang'
 __Date__ = '2021-11-20'
 
+import argparse
 import gitlab
-
 import os
 import sys
 
@@ -82,24 +81,70 @@ class GitlabAPI(object):
         branch.delete()
         print("del suc ^^^")
 
-    def create_merge_request(self, project, source_branch, target_branch, assignee_id = None):
+    def project_upload(self, project, filepath):
+        if os.path.exists(filepath):
+            result = project.upload(os.path.basename(filepath), filepath=filepath)
+            return result
+        else:
+            print('upload err ~~~')
+
+    def create_merge_request(self, project, source_branch, target_branch, assignee_id=None, description=None):
+        '''创建 merge request
+        :param project
+        :param source_branch
+        :param target_branch
+        :param assignee_id 审批人id
+        :param description: 描述
+        '''
         mr = project.mergerequests.create({'source_branch': source_branch,
                                            'target_branch': target_branch,
                                            'title': "Merge branch '%s' into '%s'" % (source_branch, target_branch),
                                            'assignee_id':assignee_id,
+                                           'description':description,
                                            })
         print(mr)
+        return mr
 
     def get_merge_requests(self, project):
         return project.mergerequests.list()
 
+    def search_project(self, project_name):
+        return self.gl.projects.list(search=project_name,all=True,visibility='private')
+
+def cmd_info(args):
+    git = GitlabAPI()
+    username='maxinliang1'
+    user = git.get_user(username)
+    print(username + '   ->   ' + str(user))
+
+
 if __name__ == '__main__':
+
+    # """执行入口
+    # """
+    # # 默认打印帮助信息
+    # if len(sys.argv) == 1:
+    #     sys.argv.append('--help')
+    # # 创建命令行解析器
+    # parser = argparse.ArgumentParser(prog="githelp", description=u"git帮助工具",
+    #                                  epilog="make it easy!")
+    # subparsers = parser.add_subparsers(title=u"可用命令")
+    # subparsers.required = True
+
+    # parser_setting = subparsers.add_parser("info", help=u"info")
+    # parser_setting.set_defaults(func=cmd_info)
+    # parser_setting.add_argument('-i', "--id", help=u'user id', action='store_true', default=False)
+
+    # # 参数解析
+    # args = parser.parse_args()
+    # args.func(args)
+
     git = GitlabAPI()
 
     username='maxinliang1'
 
-    user = git.get_user(username)
-    print(username + '   ->   ' + str(user))
+    # user = git.get_user(username)
+    # print(username + '   ->   ' + str(user))
 
     # owned_project = git.get_owned_projects()
     # for p in owned_project:
@@ -115,6 +160,11 @@ if __name__ == '__main__':
     # branch = git.create_project_branch(project, branch_name, 'master')
     # print(branch.name)
 
+    # 上传文件，可用于上传lint报告，然后创建mergerequest时上传作为codereview的资料
+    # up_result = git.project_upload(project, '/Users/gome007/Desktop/Git.png')
+    # print(up_result)
+    # {'alt': 'Git', 'url': '/uploads/0f42f60cb2d14077812411f675e0f86f/Git.png', 'markdown': '![Git](/uploads/0f42f60cb2d14077812411f675e0f86f/Git.png)'}
+
     # 删除分支
     # git.del_project_branch_by_branch_name(project, branch_name)
 
@@ -125,3 +175,7 @@ if __name__ == '__main__':
     # for mr in merge_request_list:
     #     print(mr)
 
+    # 搜索projects，可用于输入提示
+    # rs = git.search_project('GHy')
+    # for r in rs:
+    #     print(r)
