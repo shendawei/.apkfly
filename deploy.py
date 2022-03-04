@@ -99,6 +99,7 @@ def getMainModule(includeModules):
                 l = line.replace(' ', '')
                 if l.startswith("applyplugin:'com.android.application'"):
                     return includeModule
+    raise Exception("not find main module")
 
 def getIncludeModule():
     """获取include中的所有module
@@ -108,9 +109,12 @@ def getIncludeModule():
     for line in open(file_settings):
         line = line.strip()
         if not (line == '' or line.startswith('//') or line.startswith('/') or line.startswith('*')):
-            ls = line.split('\"')
-            moduleName = ls[1].replace(':', '')
-            includeModules.append(moduleName)
+            if line.startswith('include'):
+                ls = line.split('\"')
+                moduleName = ls[1].replace(':', '')
+                includeModules.append(moduleName)
+            else:
+                raise Exception("settings.gradle every line must startswith 'include'")
     return includeModules
 
 def printRed(message):
