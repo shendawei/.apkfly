@@ -1091,6 +1091,8 @@ def exec_compile_aar(modules_aar, version_index):
                     print(">>>Error AAR 版本号应该有问题，请检查后再打包")
                 elif cmd_result.find("compileReleaseJavaWithJavac FAILED") != -1:
                     print(">>>Error 项目编译应该有问题，请检查后再打包")
+                else:
+                    print "请检查是否配置全局Gradle命令"
                 break
         else:
             print('>>>Error project:%s，版本字段名未找到' % module)

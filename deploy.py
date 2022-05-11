@@ -85,7 +85,7 @@ def deployMainAppDeps():
     mainModuleInfo = ModuleInfo(mainModuleName, '', '', '')
 
     print u"4、把主工程上次部署的（依赖、排除）reset"
-    os.popen("cd %s && git checkout %s" % (mainModuleName, mainModuleInfo.getBuildFile()))
+    os.popen("cd %s && git checkout %s" % (mainModuleName, mainModuleInfo.getBuildFile())).read() #read阻塞命令到执行完毕
 
     print u"5、开始为主工程 %s build.gradle加入部署依赖" % mainModuleName
     writeConfigurationsExcludesAndCompileToBuildGradle(mainModuleInfo, moduleInfos)
@@ -217,19 +217,19 @@ def writeConfigurationsExcludesAndCompileToBuildGradle(moule, moduleInfos):
         # 添加排除配置
         writeExcludesToBuildGradle(new_file, moule, moduleInfos)
         print u"    添加排除配置完毕"
-        for line in open(moduleBuildGradle):
-            # 先把本行数据写入
-            new_file.write(line)
-            # 添加依赖配置
-            if line.strip().startswith('dependencies'):
-                # 写入compile
-                writeCompileToBuildGradle(new_file, moule, moduleInfos)
-                isWriteCompileConfig = True
-                print u"    写入compile完毕"
+        with open(moduleBuildGradle) as mbgF:
+            for line in mbgF:
+                # 先把本行数据写入
+                new_file.write(line)
+                # 添加依赖配置
+                if line.strip().startswith('dependencies'):
+                    # 写入compile
+                    writeCompileToBuildGradle(new_file, moule, moduleInfos)
+                    isWriteCompileConfig = True
+                    print u"    写入compile完毕"
     if not isWriteCompileConfig:
         printRed(u"    compile配置写入出错, 请检查")
 
-    new_file.close()
     # 把目前的build文件备份，新生成的build文件替换原文件
     # if os.path.exists(moduleBuildGradle_bak): os.remove(moduleBuildGradle_bak)
     # os.rename(moduleBuildGradle, moduleBuildGradle_bak)
