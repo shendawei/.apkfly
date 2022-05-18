@@ -28,16 +28,16 @@ def exclude_aar_dep_source(tModule, dModules):
     print u"1、include的所有module配置读取完毕"
 
     if len(includeModules) < 2:
-        print u'出错警告： setting.gradle 配置超过2个module再来哦'
+        printRed(u'出错警告： setting.gradle 配置超过2个module再来哦')
         return
 
     if tModule not in includeModules:
-        print u'出错警告： 请确保%s 已配置在setting.gradle' % (tModule)
+        printRed(u'出错警告： 请确保%s 已配置在setting.gradle' % (tModule))
         return
 
     for dm in dModules:
         if dm not in includeModules:
-            print u'出错警告： 请确保%s 已配置在setting.gradle' % ( ",".join(dModules))
+            printRed(u'出错警告： 请确保%s 已配置在setting.gradle' % ( ",".join(dModules)))
             return
 
     # 2、module的maven信息，并include的module在ext.deps[ ]中打开依赖
@@ -72,7 +72,7 @@ def deployMainAppDeps():
     print u"1、读取settings.gradle中include的所有module"
     includeModules = getIncludeModule()
     if len(includeModules) < 2:
-        print u'出错警告： setting.gradle 配置超过2个module再来哦'
+        printYellow(u'警告： setting.gradle 配置超过2个module再来哦')
         return
 
     print u"2、从build.gradle读取module的maven信息，并把include的module在其ext.deps[ ]中打开依赖"
@@ -119,6 +119,8 @@ def getIncludeModule():
 
 def printRed(message):
     print "\033[1;31m%s\033[0m" % message
+def printYellow(message):
+    print "\033[0;33m%s\033[0m" % message
 
 def getModuleMavenInfo(includeModules):
     """获取module的maven信息

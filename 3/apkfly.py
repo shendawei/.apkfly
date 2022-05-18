@@ -1013,11 +1013,11 @@ def check_modules(target_modules, deps_modules):
     err = False
     for m in target_modules:
         if not check_sub_project(m, False):
-            print('%s 不合法' % m)
+            printRed('%s module不合法，请检查' % m)
             err = True
     for m in deps_modules:
         if not check_sub_project(m, False):
-            print('%s 不合法' % m)
+            printRed('%s module不合法，请检查' % m)
             err = True
     return err
 
