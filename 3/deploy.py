@@ -484,7 +484,8 @@ def generateQRCode(text):
         else:
             return 0
     except ImportError:
-        print("Please install python requests lib !")
+        printRed("Please install python requests lib，exec the command：")
+        printRed("pip3 install requests")
         return 0
 
 # 上传apk
@@ -506,7 +507,8 @@ def uploadApkByPath(apkPath):
         else:
             return ''
     except ImportError:
-        print("Please install python requests lib !")
+        printRed("Please install python requests lib，exec the command：")
+        printRed("pip3 install requests")
         return ''
 
 
