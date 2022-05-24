@@ -737,7 +737,7 @@ def _git_check(branch_name, sub_projects, cmd_list):
                                           cwd=os.path.join(dir_current, sub_file))
         code_status = process_status.wait()
         if code_status == 0:
-            result_status = process_status.stdout.read()
+            result_status = process_status.stdout.read().decode()
             if ("working directory clean" not in result_status) and ("working tree clean" not in result_status):
                 result.append("子项目[%s] not clean" % sub_file)
                 continue
@@ -745,7 +745,7 @@ def _git_check(branch_name, sub_projects, cmd_list):
             result.append("子项目[%s]运行[git status]异常" % sub_file)
             continue
 
-        out_temp = tempfile.SpooledTemporaryFile(bufsize=10*1000)
+        out_temp = tempfile.SpooledTemporaryFile('wt')
         fileno = out_temp.fileno()
         # subprocess.PIPE 本身可容纳的量比较小，所以程序会卡死
         process_check = subprocess.Popen(cmd_list, stderr=fileno, stdout=fileno,
@@ -753,7 +753,7 @@ def _git_check(branch_name, sub_projects, cmd_list):
         code_check = process_check.wait()
         if code_check == 0:
             out_temp.seek(0)
-            result_check = [x.rstrip() for x in out_temp.readlines()]
+            result_check = [x.rstrip().decode() for x in out_temp.readlines()]
             for branch in result_check:
                 if branch.endswith(branch_name):
                     result.append("子项目[%s] - [%s]存在" % (sub_file, branch_name))
@@ -1124,7 +1124,7 @@ def _git_status(sub_projects):
                                           cwd=os.path.join(dir_current, sub_file))
         code_status = process_status.wait()
         if code_status == 0:
-            result_status = process_status.stdout.read()
+            result_status = process_status.stdout.read().decode()
             if ("working directory clean" not in result_status) and ("working tree clean" not in result_status):
                 raise Exception("子项目[%s] not clean" % sub_file)
         else:
@@ -1265,7 +1265,7 @@ def cmd_compile_merge(args):
 
             if os.path.exists(os.path.join(dir_current, m)) and os.path.isdir(os.path.join(dir_current, m)):
                 # 执行合并命令
-                out_temp = tempfile.SpooledTemporaryFile(bufsize=10*1000)
+                out_temp = tempfile.SpooledTemporaryFile('wt')
                 fileno = out_temp.fileno()
                 # subprocess.PIPE 本身可容纳的量比较小，所以程序会卡死
                 process_check = subprocess.Popen(['git', 'merge', mergeBranch], stderr=fileno, stdout=fileno,
