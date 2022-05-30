@@ -1091,9 +1091,9 @@ def exec_compile_aar(modules_aar, version_index):
             else:
                 print ">>>Error project:%s" % module
                 if cmd_result.find("uploadArchives FAILED") != -1:
-                    print ">>>Error AAR 版本号应该有问题，请检查后再打包"
+                    print u">>>Error AAR 版本号应该有问题，请检查后再打包"
                 elif cmd_result.find("compileReleaseJavaWithJavac FAILED") != -1:
-                    print ">>>Error 项目编译应该有问题，请检查后再打包"
+                    print u">>>Error 项目编译应该有问题，请检查后再打包"
                 else:
                     print "请检查是否配置全局Gradle命令"
                 break
