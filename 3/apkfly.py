@@ -1276,7 +1276,7 @@ def cmd_compile_merge(args):
 
                 # 读取命令执行结果
                 out_temp.seek(0)
-                merge_result = '\n'.join([x.rstrip() for x in out_temp.readlines()])
+                merge_result = '\n'.join([x.decode().rstrip() for x in out_temp.readlines()])
                 out_temp.close()
 
                 if mergeType1 in merge_result:
