@@ -185,6 +185,15 @@ def cmd_upload(args):
     """
     exec_sub_project("uploadArchives", args)
 
+# 压缩图片
+def cmd_imageCompress(args):
+    """
+    imageCompress
+    :param args:
+    :return:
+    """
+    exec_sub_project("imageCompressRelease", args)
+
 
 def cmd_close_awb(args):
     """
@@ -1463,6 +1472,16 @@ if __name__ == '__main__':
     parser_upload.add_argument('-s', "--start", type=str, help='执行起始点【项目名前三位，例：027】')
     parser_upload.add_argument('-o', "--only", help='只执行一个', action='store_true',
                                default=False)
+
+     # 批量对本地module进行图片压缩
+    parser_imageCompress = subparsers.add_parser("imageCompress",
+                                          help="按module名称 数字排列顺序 依次 执行gradle imageCompress 进行本地图片压缩")
+    parser_imageCompress.set_defaults(func=cmd_imageCompress)
+    parser_imageCompress.add_argument('-s', "--start", type=str, help='执行起始点【项目名前三位，例：027】')
+    parser_imageCompress.add_argument('-o', "--only", help='只执行一个', action='store_true',
+                                   default=False)
+
+
     # 批量生成awb并提交至maven私服
     parserawb_upload = subparsers.add_parser("uploadawb",
                                              help="按module名称 数字排列顺序 依次 执行gradle uploadArchives")
