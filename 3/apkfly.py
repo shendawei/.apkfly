@@ -12,6 +12,9 @@ from collections import Counter
 from xml.dom import minidom
 import deploy
 import tempfile
+import json
+import requests
+from xml_etree import modify_project_xml
 
 __author__ = "qiudongchao<1162584980@qq.com>"
 __version__ = "6.0.0"
@@ -701,15 +704,24 @@ def cmd_clone(args):
             if not os.path.exists(os.path.join(dir_current, project.path)):
                 slog("Module:%s  Branch：%s" % (project.path, project.branch))
                 slog("Url:%s" % project.url)
-                cmd = "git clone %s -b %s %s" % (project.url, project.branch, project.path)
-                clone_cmd = os.popen(cmd)
-                print(clone_cmd.read())
-                print("")  # 换行
+                _git_clone(project.url, project.branch, project.path)
             else:
                 slog("%s has already existed" % project.path)
     except Exception as e:
         sloge(e.message)
 
+def _git_clone(url, branch, path):
+    """
+    clone
+    :param url:
+    :param branch:
+    :param path:
+    :return:
+    """
+    cmd = "git clone %s -b %s %s" % (url, branch, path)
+    clone_cmd = os.popen(cmd)
+    print(clone_cmd.read())
+    print("")  # 换行
 
 def _git_projects():
     """
@@ -996,6 +1008,8 @@ def cmd_deploy(args):
     target_modules = args.target_modules
     deps_modules = args.deps_modules
     del_ex_setting_modules = args.del_ex_setting_modules
+    project_xml = args.project_xml
+    clone_project = args.clone_project
 
     if upload:
         deploy.uploadApk()
@@ -1015,8 +1029,48 @@ def cmd_deploy(args):
             print('-------------------------------------------------')
     elif del_ex_setting_modules:
         deploy.deleteExIncludeModule()
+    elif project_xml:
+        n = 3 # 三个一组：module branch group
+        if len(project_xml) % 3 == 0:
+            ps = [project_xml[i:i + n] for i in range(0, len(project_xml), n)]
+            printRed('参数分组完毕：[module, branch, group]')
+            printRed(ps)
+            modify_project_xml(ps, 'projects.xml')
+        else:
+            printRed('参数不合格')
+    elif clone_project:
+        response = requests.post("http://10.2.116.113:8000/project/deploy", data = {'project_id':clone_project})
+        project_info = json.loads(response.text)
+        printRed(project_info)
+
+        app_info = project_info.get('app')
+        app_name = app_info.get('name')
+        app_branch = app_info.get('branch')
+        app_name_new = app_name + '_' + app_branch
+
+        printGreen('1、clone workspace')
+        _git_clone(app_info.get('git'), app_info.get('branch'), app_name_new)
+
+        printGreen('2、配置project.xml')
+        ms = project_info.get('ms')
+        ms_config_list = []
+        for m in ms:
+            ms_config_list.append([m.get('name'), m.get('branch'), m.get('branch')])
+        modify_project_xml(ms_config_list, './%s/projects.xml' % app_name_new)
+
+        printGreen('3、clone modules')
+        clone_cmd = 'cd %s && ./apkflyw clone -g cms20220401' % app_name_new
+        printGreen(clone_cmd)
+        os.popen(clone_cmd).read()
+
+        printGreen('4、deploy app')
+        clone_cmd = 'cd %s && ./apkflyw setting && ./apkflyw deploy -app' % app_name_new
+        printGreen(clone_cmd)
+        os.popen(clone_cmd).read()
+
+        printGreen('执行完毕……^^……打个包试试吧，注意local.properties配置sdk')
     else:
-        print('请输入正确命令, 比如：deploy -t ... -d ...')
+        print('请输入正确命令')
 
 def check_modules(target_modules, deps_modules):
     err = False
@@ -1551,6 +1605,8 @@ if __name__ == '__main__':
     parser_apk_.add_argument("-t", "--target_modules", help='对某些module部署依赖', nargs='*')
     parser_apk_.add_argument("-d", "--deps_modules", type=str, help='依赖某些module的源码', nargs='*')
     parser_apk_.add_argument("-dm", "--del_ex_setting_modules", help='删除非setting配置的其他module', action='store_true', default=False)
+    parser_apk_.add_argument("-p", "--project_xml", help='修改xml中的某个module的branch、groups，例如把moduleA的配置修改成branch1、group1：deploy -p moduleA branch1 group1', type=str, nargs='*')
+    parser_apk_.add_argument("-c", "--clone_project", help='下载项目管理系统中的project', type=int)
 
     parser_aar = subparsers.add_parser("aar", help="批量aar")
     parser_aar.set_defaults(func=cmd_compile_aar)
