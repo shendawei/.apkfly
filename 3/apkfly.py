@@ -1039,7 +1039,19 @@ def cmd_deploy(args):
         else:
             printRed('参数不合格')
     elif clone_project:
-        response = requests.post("http://10.2.116.113:8000/project/deploy", data = {'project_id':clone_project})
+        project_deploy_url = "http://10.2.116.113:8000/project/deploy"
+        try:
+            import requests
+            response = requests.post(project_deploy_url, data = {'project_id':clone_project})
+        except ImportError:
+            printRed("Please install python requests lib，exec the command：")
+            printRed("pip3 install requests")
+            return
+
+        if not response or response.status_code != 200:
+            printRed(project_deploy_url + " 访问失败")
+            return
+
         project_info = json.loads(response.text)
         printRed(project_info)
 
