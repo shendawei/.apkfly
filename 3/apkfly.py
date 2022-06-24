@@ -13,7 +13,6 @@ from xml.dom import minidom
 import deploy
 import tempfile
 import json
-import requests
 from xml_etree import modify_project_xml
 
 __author__ = "qiudongchao<1162584980@qq.com>"
