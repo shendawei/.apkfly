@@ -1230,7 +1230,7 @@ def cmd_compile_merge(args):
 
     # 检查git状态
     _git_status(includeModules)# modules
-    _git_status([dir_current])# workspace
+    _git_status([dir_current])# workspace # todo 如果当前在主分支，由子分支 -> 主分支，而此时workspace中有了project_merge.xml，这个检查合法性肯定报错
 
     # projects_merge.xml配置信息
     projects_merge = []
@@ -1327,6 +1327,7 @@ def cmd_compile_merge(args):
             if len(projects_merge) > 0:
                 try:
                     mergeBranch = projects_merge[forCount-1].branch
+                    # todo IndexError: list index out of range
                 except IndexError as e:
                     sloge(e.message)
             else:
