@@ -1562,11 +1562,11 @@ if __name__ == '__main__':
     parser_aar.add_argument('-nc', "--not_check", help=u'不检查，不排序，直接按照输入的顺序打包', action='store_true', default=False)
     #parser_aar.add_argument("-s", "--start_projects_xml", type=str, default='GFrameHttp', help=u'从某个module开始打包（根据projects.xml中的顺序）')
 
-    parser_merge = subparsers.add_parser("merge", help=u"合并代码，默认setting配置的所有module")
-    parser_merge.set_defaults(func=cmd_compile_merge)
-    parser_merge.add_argument('branch', help=u'本地分支名，暂不支持远程分支', action='store')
-    parser_merge.add_argument('-w', '--workspace_setting', help=u'setting配置的所有module + WorkSpace都参与合并', action='store_true', default=False)
-    parser_merge.add_argument('-m', '--main_branch', type=str, help=u'主分支名名，从需求分支自动切换到主分支，然后再合并代码（适合工作空间还在需求分支上的场景）')
+    # parser_merge = subparsers.add_parser("merge", help=u"合并代码，默认setting配置的所有module")
+    # parser_merge.set_defaults(func=cmd_compile_merge)
+    # parser_merge.add_argument('branch', help=u'本地分支名，暂不支持远程分支', action='store')
+    # parser_merge.add_argument('-w', '--workspace_setting', help=u'setting配置的所有module + WorkSpace都参与合并', action='store_true', default=False)
+    # parser_merge.add_argument('-m', '--main_branch', type=str, help=u'主分支名名，从需求分支自动切换到主分支，然后再合并代码（适合工作空间还在需求分支上的场景）')
 
     # 切换远程地址
     parser_remote = subparsers.add_parser("remote", help=u"远程地址")
