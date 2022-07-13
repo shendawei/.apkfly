@@ -1051,7 +1051,7 @@ def cmd_deploy(args):
             printRed(project_deploy_url + " 访问失败")
             return
 
-        project_info = json.loads(response.text)
+        project_info = response.json()
         printRed(project_info)
 
         app_info = project_info.get('app')
@@ -1070,7 +1070,7 @@ def cmd_deploy(args):
         modify_project_xml(ms_config_list, './%s/projects.xml' % app_name_new)
 
         printGreen('3、clone modules')
-        clone_cmd = 'cd %s && ./apkflyw clone -g cms20220401' % app_name_new
+        clone_cmd = 'cd %s && ./apkflyw clone -g %s' % (app_name_new, app_branch)
         printGreen(clone_cmd)
         os.popen(clone_cmd).read()
 
