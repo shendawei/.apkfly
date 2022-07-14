@@ -1,7 +1,14 @@
 #!/usr/bin/env python3
 # encoding: utf-8
+from xml.etree import ElementTree
+from xml.etree.ElementTree import TreeBuilder, Comment
 
-import xml.etree.ElementTree as ET
+
+class CommentedTreeBuilder(TreeBuilder):
+    def comment(self, data):
+        self.start(Comment, {})
+        self.data(data)
+        self.end(Comment)
 
 
 def modify_project_xml(ps, project_xml_path):
@@ -12,7 +19,7 @@ def modify_project_xml(ps, project_xml_path):
     :return:
     """
 
-    tree = ET.parse(project_xml_path)
+    tree = ElementTree.parse(project_xml_path, parser=ElementTree.XMLParser(target=CommentedTreeBuilder()))
     root = tree.getroot()
 
     for p_xml in root.iter('project'):
@@ -28,5 +35,13 @@ def modify_project_xml(ps, project_xml_path):
                 print('-' * 50)
 
     # 覆盖原文件
-    tree.write(project_xml_path)
+    tree.write(project_xml_path, encoding='utf-8', xml_declaration=True)
     print('覆盖原文件完毕')
+
+# 测试代码
+
+# ps = [
+#     ['GAmusement', 'abc', 'abc'],
+#     ['GomePlus', 'abc', 'abc']
+# ]
+# modify_project_xml(ps, './3/projects.xml')
