@@ -19,12 +19,12 @@ def modify_project_xml(ps, project_xml_path):
         for p in ps:
             if p_xml.get('url').endswith('/%s.git' % p[0]):
                 # 命中一个project
-                print('修改%s开始' % p[0].encode('utf-8'))
+                print('修改%s开始' % p[0])
                 print(p_xml.attrib)
-                p_xml.set('branch', p[1].encode('utf-8'))
-                p_xml.set('groups', p[2].encode('utf-8'))
+                p_xml.set('branch', p[1])
+                p_xml.set('groups', p[2])
                 print(p_xml.attrib)
-                print('修改%s完毕' % p[0].encode('utf-8'))
+                print('修改%s完毕' % p[0])
                 print('-' * 50)
 
     # 覆盖原文件
