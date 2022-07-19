@@ -1056,16 +1056,20 @@ def cmd_deploy(args):
 
         app_info = project_info.get('app')
         app_name = app_info.get('name')
+        app_git = app_info.get('git')
         app_branch = app_info.get('branch')
         app_name_new = app_name + '_' + app_branch
 
         printGreen('1、clone workspace')
-        _git_clone(app_info.get('git'), app_info.get('branch'), app_name_new)
+        _git_clone(app_git, app_branch, app_name_new)
 
         printGreen('2、配置project.xml')
         ms = project_info.get('ms')
         ms_config_list = []
         for m in ms:
+            if m.get('git') == app_git:
+                # workspace不修改project.xml不然第3步会重复下载workspace
+                continue
             ms_config_list.append([m.get('name'), m.get('branch'), m.get('branch')])
         modify_project_xml(ms_config_list, './%s/projects.xml' % app_name_new)
 
