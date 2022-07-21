@@ -1038,7 +1038,7 @@ def cmd_deploy(args):
         else:
             printRed('参数不合格')
     elif clone_project:
-        project_deploy_url = "http://10.2.47.8:8000/project/deploy"
+        project_deploy_url = "http://10.2.47.6:8000/project/deploy"
         try:
             import requests
             response = requests.post(project_deploy_url, data = {'project_id':clone_project})
