@@ -1407,28 +1407,28 @@ def cmd_compile_merge(args):
 
                 if mergeType1 in merge_result:
                     print('合并成功，分支<%s>没有任何修改' % mm_m_branch)
-                    mergeType1M.append(m)
+                    mergeType1M.append(mm_name)
                 elif mergeType2 in merge_result:
                     print('合并成功，记得去push [Fast-forward]')
-                    mergeType2M.append(m)
+                    mergeType2M.append(mm_name)
                 elif mergeType3 in merge_result:
                     print("合并成功，记得去push [Merge made by the 'recursive' strategy]")
-                    mergeType3M.append(m)
+                    mergeType3M.append(mm_name)
                 elif mergeType4 in merge_result:
                     sloge4red('合并出错，屮艸芔茻，有冲突 <Err>')
-                    mergeType4M.append(m)
+                    mergeType4M.append(mm_name)
                 elif mergeType6 in merge_result:
                     sloge4red('本项目应该没有该分支%s，请检查后再处理 <Err>' % mm_m_branch)
-                    mergeType6M.append(m)
+                    mergeType6M.append(mm_name)
                 else:
                     sloge4red('合并出错，无法分析合并log，请自行分析 <Warn>')
-                    mergeType5M.append(m)
+                    mergeType5M.append(mm_name)
                 mergeReustLog.write('\nmerge_result:\n%s\n' % merge_result)
             else:
                 log = '项目不存在，请核实 <Err>'
                 sloge4red(log)
                 mergeReustLog.write('\n%s\n' % log)
-                mergeType7M.append(m)
+                mergeType7M.append(mm_name)
 
             end_log = "合并结束\n-----------------------------------------------------"
             print(end_log)
