@@ -1151,7 +1151,8 @@ def exec_compile_aars(modules_aar, version_index, not_check):
     # 轮询批量aar
     exec_compile_aar(modules_aar_new, version_index)
 
-    print('3、打包结束')
+    printGreen('3、全部打包成功')
+    print(modules_aar_new)
 
 def exec_compile_aar(modules_aar, version_index):
     for module in modules_aar:
