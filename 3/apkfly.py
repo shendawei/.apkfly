@@ -11,6 +11,7 @@ import xml
 from collections import Counter
 from xml.dom import minidom
 import deploy
+import sync
 import tempfile
 import json
 from xml_etree import modify_project_xml
@@ -1038,7 +1039,7 @@ def cmd_deploy(args):
         else:
             printRed('参数不合格')
     elif clone_project:
-        project_deploy_url = "http://10.2.47.6:8000/project/deploy"
+        project_deploy_url = "http://10.2.117.52:8000/project/deploy"
         try:
             import requests
             response = requests.post(project_deploy_url, data = {'project_id':clone_project})
@@ -1529,6 +1530,30 @@ def swRemoteHost(host, moduleDir):
         # print cmdSet
         os.popen(cmdSet).read()
         print("%s 切换远程地址执行完成 ！\n" % moduleDir)
+
+def syncVersion(args):
+    score = args.score
+    platform = args.platform
+    path = args.path
+    keys = args.keys
+    query = args.query
+
+    try:
+        if(query is False):
+            # 同步操作
+            if(path is not None):
+                sync.sync_version(score, platform, keys, os.path.join(dir_current, path), query)
+                print("版本同步完成完成!\n")
+            else:
+                print("版本文件不能为空!\n")
+        else:
+            # 查询操作
+            if(len(score) > 1):
+                print("查询仅支持单应用, 请修改版本同步范围 (-s)! \n")
+            else:
+                sync.sync_version(score, platform, keys, os.path.join(dir_current, path), query)
+    except Exception as err:
+        print(err)
 ###################################################################
 ### 主程序入口
 ###################################################################
@@ -1689,6 +1714,15 @@ if __name__ == '__main__':
     parser_remote = subparsers.add_parser("remote", help="远程地址")
     parser_remote.set_defaults(func=cmd_remote)
     parser_remote.add_argument("-s", "--set", help='切换远程地址Host, apkfly.py remote -s git@code.gome.inc', action='append', default=[])
+
+    # 同步服务器最新版本号
+    parser_sync = subparsers.add_parser("sync", help=u"同步本地、服务器gradle.properties内AAR版本号")
+    parser_sync.set_defaults(func=syncVersion)
+    parser_sync.add_argument('-s', '--score', help=u'版本同步范围, 多个逗号隔开: 1-真快乐, 2-帮客, 3-帮帮, 4-Mini, 5-Pop', type=str, required=True)
+    parser_sync.add_argument('-p', '--platform', help=u'平台类型: 1-Android, 2-iOS', type=int,  choices=[1, 2], required=True)
+    parser_sync.add_argument('-f', '--path', help=u'gradle.properties路径', type=str)
+    parser_sync.add_argument('-k', '--keys', help=u'指定AAR同步, 多个逗号隔开', type=str)
+    parser_sync.add_argument('-q', '--query', help=u'是否开启查询', action='store_true', default=False)
 
     # 参数解析
     args = parser.parse_args()
