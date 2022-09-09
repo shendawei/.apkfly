@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 import json
-import requests
 import os.path
+import log
 
 '''
 # 版本号同步
@@ -62,6 +62,13 @@ def sync_version(score, platform, keys, path, query):
             update_versions = local_versions[start_index + 1:end_index]
         else:
             raise Exception("版本文件内未配置AAR_VERSION_SYNC_START/AAR_VERSION_SYNC_END")
+
+    try:
+        import requests
+    except ImportError:
+        log.e("Please install python requests lib，exec the command：")
+        log.e("sudo pip3 install requests")
+        return
 
     try:
         if(query):

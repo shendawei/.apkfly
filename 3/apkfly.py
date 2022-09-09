@@ -10,10 +10,10 @@ import time
 import xml
 from collections import Counter
 from xml.dom import minidom
+import log
 import deploy
 import sync
 import tempfile
-import json
 from xml_etree import modify_project_xml
 
 __author__ = "qiudongchao<1162584980@qq.com>"
@@ -121,7 +121,7 @@ def exec_sub_project(cmd, args):
                      check_sub_project(x, True)]
 
     if len(sub_file_list) == 0:
-        printRed('not found sub project')
+        log.e('not found sub project')
         return
 
     # print "project sub_file_list >>> ",sub_file_list
@@ -343,14 +343,14 @@ def cmd_setting(args):
     if args.flutter:
         mainModule = deploy.getMainModule(sub_file_list)
         if mainModule == None:
-            printRed('没有找到主工程')
+            log.e('没有找到主工程')
             return
         flutterModule = ""
         for sub_file in sub_file_list:
             if os.path.exists(os.path.join(dir_current, sub_file, '.android/include_flutter.groovy')):
                 flutterModule = sub_file
         if flutterModule == "":
-            printRed('没有找到flutter工程')
+            log.e('没有找到flutter工程')
             return
         setting_content = flutter_setting_content % (flutterModule, mainModule)
         sub_file_list.remove(mainModule)
@@ -485,7 +485,7 @@ def cmd_dep(args):
 
     if os.path.exists(os.path.join(dir_current, project)) and os.path.isdir(project):
         deps_cmd = deps_cmd % (project, configuration)
-        printGreen(deps_cmd)
+        log.i(deps_cmd)
         deps_result = os.popen(deps_cmd)
         content_list = deps_result.readlines()
         dep_list = []
@@ -1033,27 +1033,27 @@ def cmd_deploy(args):
         n = 3 # 三个一组：module branch group
         if len(project_xml) % 3 == 0:
             ps = [project_xml[i:i + n] for i in range(0, len(project_xml), n)]
-            printRed('参数分组完毕：[module, branch, group]')
-            printRed(ps)
+            log.e('参数分组完毕：[module, branch, group]')
+            log.e(ps)
             modify_project_xml(ps, 'projects.xml')
         else:
-            printRed('参数不合格')
+            log.e('参数不合格')
     elif clone_project:
         project_deploy_url = "http://10.2.117.52:8000/project/deploy"
         try:
             import requests
             response = requests.post(project_deploy_url, data = {'project_id':clone_project})
         except ImportError:
-            printRed("Please install python requests lib，exec the command：")
-            printRed("pip3 install requests")
+            log.e("Please install python requests lib，exec the command：")
+            log.e("sudo pip3 install requests")
             return
 
         if not response or response.status_code != 200:
-            printRed(project_deploy_url + " 访问失败")
+            log.e(project_deploy_url + " 访问失败")
             return
 
         project_info = response.json()
-        printRed(project_info)
+        log.e(project_info)
 
         app_info = project_info.get('app')
         app_name = app_info.get('name')
@@ -1061,10 +1061,10 @@ def cmd_deploy(args):
         app_branch = app_info.get('branch')
         app_name_new = app_name + '_' + app_branch
 
-        printGreen('1、clone workspace')
+        log.i('1、clone workspace')
         _git_clone(app_git, app_branch, app_name_new)
 
-        printGreen('2、配置project.xml')
+        log.i('2、配置project.xml')
         ms = project_info.get('ms')
         ms_config_list = []
         for m in ms:
@@ -1074,17 +1074,17 @@ def cmd_deploy(args):
             ms_config_list.append([m.get('name'), m.get('branch'), m.get('branch')])
         modify_project_xml(ms_config_list, './%s/projects.xml' % app_name_new)
 
-        printGreen('3、clone modules')
+        log.i('3、clone modules')
         clone_cmd = 'cd %s && ./apkflyw clone -g %s' % (app_name_new, app_branch)
-        printGreen(clone_cmd)
+        log.i(clone_cmd)
         os.popen(clone_cmd).read()
 
-        printGreen('4、deploy app')
+        log.i('4、deploy app')
         clone_cmd = 'cd %s && ./apkflyw setting && ./apkflyw deploy -app' % app_name_new
-        printGreen(clone_cmd)
+        log.i(clone_cmd)
         os.popen(clone_cmd).read()
 
-        printGreen('执行完毕……^^……打个包试试吧，注意local.properties配置sdk')
+        log.i('执行完毕……^^……打个包试试吧，注意local.properties配置sdk')
     else:
         print('请输入正确命令')
 
@@ -1092,11 +1092,11 @@ def check_modules(target_modules, deps_modules):
     err = False
     for m in target_modules:
         if not check_sub_project(m, False):
-            printRed('%s module不合法，请检查' % m)
+            log.e('%s module不合法，请检查' % m)
             err = True
     for m in deps_modules:
         if not check_sub_project(m, False):
-            printRed('%s module不合法，请检查' % m)
+            log.e('%s module不合法，请检查' % m)
             err = True
     return err
 
@@ -1152,7 +1152,7 @@ def exec_compile_aars(modules_aar, version_index, not_check):
     # 轮询批量aar
     exec_compile_aar(modules_aar_new, version_index)
 
-    printGreen('3、全部打包成功')
+    log.i('3、全部打包成功')
     print(modules_aar_new)
 
 def exec_compile_aar(modules_aar, version_index):
@@ -1219,14 +1219,14 @@ def _git_status(sub_projects, is_raise_origin_err = False):
         print("子项目[%s] 正常" % sub_file)
 
 def checkout_branch_pull(module, branch):
-    printGreen('%s: git checkout %s' % (module, branch))
+    log.i('%s: git checkout %s' % (module, branch))
     # 切换目录到module
     os.chdir(os.path.join(dir_current, module))
     # 切换分支
     git_cmd = os.popen("git checkout %s" % branch)
     print(git_cmd.read())
     # 更新一下
-    printGreen('%s: git pull')
+    log.i('%s: git pull')
     git_cmd = os.popen("git pull")
     print(git_cmd.read())
     # 切换目录到workspace
@@ -1245,7 +1245,7 @@ def cmd_compile_merge(args):
     # settings.gradle 中的module配置
     include_modules = deploy.getIncludeModule()
     if len(include_modules) < 1:
-        printRed('结束合并操作，settings中没有配置module，如果只合并workspace请直接使用git原始操作合并吧')
+        log.e('结束合并操作，settings中没有配置module，如果只合并workspace请直接使用git原始操作合并吧')
         return
 
     # 检查git状态
@@ -1253,11 +1253,11 @@ def cmd_compile_merge(args):
         # workspace
         _git_status([dir_current], True)
     except Exception as err:
-        printRed(err)
-        printGreen('如果当前在主分支，由子分支 -> 主分支，而此时workspace中主动生成创建了project_merge.xml，此时检查合法性肯定报错')
+        log.e(err)
+        log.i('如果当前在主分支，由子分支 -> 主分支，而此时workspace中主动生成创建了project_merge.xml，此时检查合法性肯定报错')
         request_code = input("workspace没有clean，请确定是否忽略这个错误 y/n:")
         if request_code != 'y':
-            printRed('结束合并操作')
+            log.e('结束合并操作')
             return
     # modules
     _git_status(include_modules)
@@ -1269,7 +1269,7 @@ def cmd_compile_merge(args):
         # 判断当前分支是否是业务分支
         cBranch = os.popen("git branch --show-current").read().strip()
         if branch != cBranch:
-            printRed('当前不在业务分支，请再检查一下branch != cBranch ? %s:%s' % (branch, cBranch))
+            log.e('当前不在业务分支，请再检查一下branch != cBranch ? %s:%s' % (branch, cBranch))
             return
 
         # 1、备份需求分支上的projects.xml
@@ -1289,7 +1289,7 @@ def cmd_compile_merge(args):
         # 2.2、setting中配置的module切换到主分支，并更新代码
         for p in projects_main:
             # 打印分割线
-            printGreen("------------------------------------------")
+            log.i("------------------------------------------")
             # 切换分支到主干
             checkout_branch_pull(p.path, p.branch)
 
@@ -1302,15 +1302,15 @@ def cmd_compile_merge(args):
             if len(include_modules) != len(projects_merge):
                 print('settings.gradle获取的module数量 %s' % len(include_modules))
                 print('projects_merge.xml获取的module数量 %s' % len(projects_merge))
-                printRed('结束合并操作，settings.gradle与projects_merge.xml配置的module数量不一样')
+                log.e('结束合并操作，settings.gradle与projects_merge.xml配置的module数量不一样')
                 return
         else:
-            printRed('结束合并操作')
+            log.e('结束合并操作')
             return
     else:
         request_code = input("当前没有找到projects_merge.xml，所有合并分支都用%s y/n:" % branch)
         if "y" != request_code:
-            printRed('结束合并操作')
+            log.e('结束合并操作')
             return
 
     # 组装settings中配置的module合并对象
@@ -1343,17 +1343,17 @@ def cmd_compile_merge(args):
         })
 
     if len(merge_modules) < 1:
-        printRed("结束合并操作，merge modules is empty")
+        log.e("结束合并操作，merge modules is empty")
         return
 
-    printRed('\n\n合并信息如下：')
+    log.e('\n\n合并信息如下：')
     for mm in merge_modules:
-        printRed('%s 合并: %s -> %s' % (mm.get('name'), mm.get('m_branch'), mm.get('branch')))
+        log.e('%s 合并: %s -> %s' % (mm.get('name'), mm.get('m_branch'), mm.get('branch')))
 
     # 马上合并集合中的所有module，用户再次确认合并信息
     request_code = input("请确定上方红色打印的合并信息是否正确 y/n:")
     if request_code != 'y':
-        printRed('结束合并操作')
+        log.e('结束合并操作')
         return
 
     mergeLogName = 'merge-result.log'
@@ -1448,53 +1448,44 @@ def cmd_compile_merge(args):
     if len(mergeType1M) > 0:
         printNum = printNum + 1
         msg1 = '\n%s、合并成功，没有任何修改的项目，共%s个：' % (printNum, len(mergeType1M))
-        printGreen(msg1)
+        log.i(msg1)
         print(mergeType1M)
 
     if len(mergeType2M) > 0:
         printNum = printNum + 1
         msg2 = '\n%s、合并成功，记得去push的项目[Fast-forward]，共%s个：' % (printNum, len(mergeType2M))
-        printGreen(msg2)
+        log.i(msg2)
         print(mergeType2M)
 
     if len(mergeType3M) > 0:
         printNum = printNum + 1
         msg3 = "\n%s、合并成功，记得去push的项目[Merge made by the 'recursive' strategy]，共%s个：" % (printNum, len(mergeType3M))
-        printGreen(msg3)
+        log.i(msg3)
         print(mergeType3M)
 
     if len(mergeType4M) > 0:
         printNum = printNum + 1
         msg4 = '\n%s、合并出错，屮艸芔茻，有冲突的项目，共%s个：' % (printNum, len(mergeType4M))
-        printRed(msg4)
+        log.e(msg4)
         print(mergeType4M)
 
     if len(mergeType5M) > 0:
         printNum = printNum + 1
         msg5 = '\n%s、合并出错，无法分析log，请自行查看的项目，共%s个：' % (printNum, len(mergeType5M))
-        printRed(msg5)
+        log.e(msg5)
         print(mergeType5M)
 
     if len(mergeType6M) > 0:
         printNum = printNum + 1
         msg6 = '\n%s、没有对应分支的项目，共%s个：' % (printNum, len(mergeType6M))
-        printYellow(msg6)
+        log.w(msg6)
         print(mergeType6M)
 
     if len(mergeType7M) > 0:
         printNum = printNum + 1
         msg7 = '\n%s、项目不存在，共%s个：' % (printNum, len(mergeType7M))
-        printYellow(msg7)
+        log.w(msg7)
         print(mergeType7M)
-
-def printGreen(message):
-    print("\033[0;36m%s\033[0m" % message)
-
-def printRed(message):
-    print("\033[0;31m%s\033[0m" % message)
-
-def printYellow(message):
-    print("\033[0;33m%s\033[0m" % message)
 
 def cmd_remote(args):
     set = args.set

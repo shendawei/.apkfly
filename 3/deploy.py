@@ -6,6 +6,7 @@ import re
 import time
 import platform
 import subprocess
+import log
 
 ##########################################
 
@@ -24,16 +25,16 @@ def exclude_aar_dep_source(tModule, dModules):
     print("1、include的所有module配置读取完毕")
 
     if len(includeModules) < 2:
-        printRed('出错警告： setting.gradle 配置超过2个module再来哦')
+        log.e('出错警告： setting.gradle 配置超过2个module再来哦')
         return
 
     if tModule not in includeModules:
-        printRed('出错警告： 请确保%s 已配置在setting.gradle' % (tModule))
+        log.e('出错警告： 请确保%s 已配置在setting.gradle' % (tModule))
         return
 
     for dm in dModules:
         if dm not in includeModules:
-            printRed('出错警告： 请确保%s 已配置在setting.gradle' % ( ",".join(dModules)))
+            log.e('出错警告： 请确保%s 已配置在setting.gradle' % ( ",".join(dModules)))
             return
 
     # 2、module的maven信息，并include的module在ext.deps[ ]中打开依赖
@@ -68,7 +69,7 @@ def deployMainAppDeps():
     print("1、读取settings.gradle中include的所有module")
     includeModules = getIncludeModule()
     if len(includeModules) < 2:
-        printYellow('警告： setting.gradle 配置超过2个module再来哦')
+        log.i('警告： setting.gradle 配置超过2个module再来哦')
         return
 
     print("2、从build.gradle读取module的maven信息，并把include的module在其ext.deps[ ]中打开依赖")
@@ -113,11 +114,6 @@ def getIncludeModule():
                 raise Exception("settings.gradle every line must startswith 'include'")
     return includeModules
 
-def printRed(message):
-    print("\033[1;31m%s\033[0m" % message)
-def printYellow(message):
-    print("\033[0;33m%s\033[0m" % message)
-
 def getModuleMavenInfo(includeModules):
     """获取module的maven信息
     :param includeModules:
@@ -149,12 +145,12 @@ def getModuleMavenInfo(includeModules):
                         # 这里不能直接用line包含includeModule，应为module有MIm、MImlibrary这样的，如果只include MIm，MImlibrary也会被修改，所以得加上: 一块匹配
                         if (includeModule + ":") in line_:
                             isMatch = True
-                            # printRed('1 > '+line_)
+                            # log.e('1 > '+line_)
                             curModule = includeModule
                             break
                         elif ("':%s'" % includeModule) in line_:
                             isMatch = True
-                            # printRed('2 > '+line_)
+                            # log.e('2 > '+line_)
                             curModule = includeModule
                             # 分割，取deps别名
                             lines = line_.split(':', 1)
@@ -175,7 +171,7 @@ def getModuleMavenInfo(includeModules):
                                 line = line_.replace(depTag2 % (includeModule, 'false'), depTag2 % (includeModule, 'true'), 1)
                             elif not line_.startswith(depTag2 % (includeModule, 'true')):
                                 # 有bug，有的不是这个关键字而直接写的 false
-                                printRed('%s项目没有打开源码依赖开关' % includeModule)
+                                log.e('%s项目没有打开源码依赖开关' % includeModule)
 
                         # 2、马上进入解析 ext.deps[ ] 中的配置
                         # 从build.gradle的deps配置中查出module的maven信息
@@ -195,7 +191,7 @@ def getModuleMavenInfo(includeModules):
 
         # 做个验证，
         if len(includeModules) - 1 > len(moduleInfos):
-            printRed("获取setting中module的maven信息出错 - getModuleMavenInfo - 请检查")
+            log.e("获取setting中module的maven信息出错 - getModuleMavenInfo - 请检查")
     return moduleInfos
 
 def writeConfigurationsExcludesAndCompileToBuildGradle(moule, moduleInfos):
@@ -226,7 +222,7 @@ def writeConfigurationsExcludesAndCompileToBuildGradle(moule, moduleInfos):
                     isWriteCompileConfig = True
                     print("    写入compile完毕")
     if not isWriteCompileConfig:
-        printRed("    compile配置写入出错, 请检查")
+        log.e("    compile配置写入出错, 请检查")
 
     # 把目前的build文件备份，新生成的build文件替换原文件
     # if os.path.exists(moduleBuildGradle_bak): os.remove(moduleBuildGradle_bak)
@@ -484,8 +480,8 @@ def generateQRCode(text):
         else:
             return 0
     except ImportError:
-        printRed("Please install python requests lib，exec the command：")
-        printRed("pip3 install requests")
+        log.e("Please install python requests lib，exec the command：")
+        log.e("pip3 install requests")
         return 0
 
 # 上传apk
@@ -507,8 +503,8 @@ def uploadApkByPath(apkPath):
         else:
             return ''
     except ImportError:
-        printRed("Please install python requests lib，exec the command：")
-        printRed("pip3 install requests")
+        log.e("Please install python requests lib，exec the command：")
+        log.e("pip3 install requests")
         return ''
 
 
